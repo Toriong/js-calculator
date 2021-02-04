@@ -1,7 +1,7 @@
 
 
 var clrButton = document.querySelector("#clear");
-var positiveAndNegativeButton = document.querySelector("#positivie-negativec");
+var positiveAndNegativeButton = document.querySelector("#positive-negative");
 var percentageButton = document.querySelector("#percentage");
 var percentageJs = percentageButton.value;
 var divideButton = document.querySelector("#division")
@@ -37,78 +37,213 @@ var decimal = decimalButton.value;
 var equalsButton = document.querySelector("#equals")
 var equalsSign = equalsButton.value;
 var outPutScreen = document.querySelector(".output")
+var numButton = document.querySelector(".num-button")
 
 
+var displayArrayGlobal = [];
+var mathSymobols = [plus, minus, divide, multiple]
+var numbers = [0,1,2,3,4,5,6,7,8,9]
 
-var displayNumberOnCalcScreenArray = [];
-var equationArray = [];
 
-
-function displayNumOnCalcScreen(num) {
+function arrayCheck(item, array) {
     return function () {
-        var numArray = []
-        numArray.push(num);
-        console.log(numArray);
-        displayNumberOnCalcScreenArray.push((num));
-        console.log(displayNumberOnCalcScreenArray)
-        var number = numArray.join(""); 
-        outPutScreen.appendChild(document.createTextNode(number));   
-    }
-}
-
-function arithmeticSignPressed(arithemticSign) {
-    return function () {
-        if (displayNumberOnCalcScreenArray.length == 0) {
-            equationArray.push(((arithemticSign)));
+        if (mathSymobols.includes(item) && displayArrayGlobal[displayArrayGlobal.length - 1] === item) {
+            (console.log("i am working one"))
+            var errorFound = array.pop();
+        } else if (typeof displayArrayGlobal[0] === 'number' && typeof parseInt(item) === 'number' && item !== "+") {
+            console.log(item);
+            console.log('i am working two')
+            displayArrayGlobal.splice(0);
+            displayArrayGlobal.push(item);
             outPutScreen.innerHTML = " ";
-            outPutScreen.appendChild(document.createTextNode(equationArray.join("")));
-            console.log(equationArray.join(""))
-            displayNumberOnCalcScreenArray.splice(0);
-        } else if(displayNumberOnCalcScreenArray.length >= 0) {
-            var number = displayNumberOnCalcScreenArray.join("");
-            equationArray.push(parseInt(number));
-            equationArray.push(((arithemticSign)));
-            console.log(equationArray);
-            outPutScreen.innerHTML = " ";
-            outPutScreen.appendChild(document.createTextNode(equationArray.join("")));
-            displayNumberOnCalcScreenArray.splice(0);
-            console.log(equationArray);
+            outPutScreen.appendChild(document.createTextNode(item));
         }
+        return errorFound;
+    
     }
 }
 
+function displayArrayManipulation(value) {
+    return function () {
+        var displayArray = []
+        displayArray.push(value);
+        var check = arrayCheck(value, displayArray);
+        if (displayArrayGlobal[displayArrayGlobal.length - 1] === value || typeof displayArrayGlobal[0] === 'number') {
+            console.log("check will be executed")
+            check();
+        }
+        var display = displayArray.join("");
+        outPutScreen.appendChild(document.createTextNode(display));
+        displayArrayGlobal.push(value);
+    }
+    
+}
 
 function equals() {
     return function () {
-        equationArray.push(parseInt(displayNumberOnCalcScreenArray.join("")))
-        console.log(equationArray);
-        var equation = equationArray.join("");
         outPutScreen.innerHTML = " ";
-        outPutScreen.appendChild(document.createTextNode(eval(equation)));
-        equationArray.splice(0);
+        var answer = displayArrayGlobal.join("")
+        outPutScreen.appendChild(document.createTextNode(eval(answer)));
+        displayArrayGlobal.splice(0);
+        displayArrayGlobal.push(eval(answer));
+    }
+}
+oneButton.addEventListener("click", displayArrayManipulation(numOne));
+twoButton.addEventListener("click", displayArrayManipulation(numTwo));
+addButton.addEventListener("click", displayArrayManipulation(plus));
+equalsButton.addEventListener("click", equals());
+
+
+
+
+
+// function displayNumOnCalcScreen(num) {
+//     return function () {
+//         var numArray = []
+//         numArray.push(num);
+//         console.log(numArray);
+//         displayNumberOnCalcScreenArray.push((num));
+//         console.log(displayNumberOnCalcScreenArray)
+//         var number = numArray.join(""); 
+//         outPutScreen.appendChild(document.createTextNode(number));   
+//     }
+// }
+// function integerOrFloat(number) {
+//     var integerOrFloat = number;
+//     console.log(integerOrFloat);
+//     if (integerOrFloat.indexOf(".") == -1) {
+//         console.log("I am a integer");
+//         parseInt(integerOrFloat);
+//     } else if (integerOrFloat.indexOf(".") != -1) {
+//         console.log("I am a float");
+//         parseFloat(integerOrFloat);
+//     }
+//     return integerOrFloat;
+    
+// }
+
+// function arithmeticSignPressed(arithemticSign) {
+//     return function () {
+//         if (displayNumberOnCalcScreenArray.length == 0) {
+//             equationArray.push(((arithemticSign)));
+//             outPutScreen.innerHTML = " ";
+//             outPutScreen.appendChild(document.createTextNode(equationArray.join("")));
+//             console.log(equationArray.join(""))
+//             displayNumberOnCalcScreenArray.splice(0);
+//         } else if(displayNumberOnCalcScreenArray.length >= 0) {
+//             var numberString = displayNumberOnCalcScreenArray.join("");
+//             equationArray.push(integerOrFloat(numberString));
+//             equationArray.push(((arithemticSign)));
+//             console.log(equationArray);
+//             outPutScreen.innerHTML = " ";
+//             outPutScreen.appendChild(document.createTextNode(equationArray.join("")));
+//             displayNumberOnCalcScreenArray.splice(0);
+//             console.log(equationArray);
+//         }
+//     }
+// }
+
+
+
+// function equals() {
+//         equationArray.push(integerOrFloat((displayNumberOnCalcScreenArray.join(""))))
+//         console.log(equationArray);
+//         var equation = equationArray.join("");
+//         outPutScreen.innerHTML = " ";
+//         outPutScreen.appendChild(document.createTextNode(eval(equation)));
+//         equationArray.splice(0);
+//         displayNumberOnCalcScreenArray.splice(0);
+//         equationArray.push(eval(equation));
+//         return equation;
+//     }
+
+
+
+// function changeNumIntoPercentage(numberAsString) {
+//     return function () {
+//         if (displayNumberOnCalcScreenArray.length != 0 && equationArray.length == 0 ) {
+//             var number = numberAsString.join("");
+//             var num = integerOrFloat(number);
+//             console.log(num);
+//             var percentage = num / 100
+//             console.log(percentage);
+//             outPutScreen.innerHTML = " ";
+//             displayNumberOnCalcScreenArray.splice(0);
+//             equationArray.push(percentage);
+//             outPutScreen.appendChild(document.createTextNode(percentage));
+//             console.log("#1")
+//         } else if (equationArray.length != 0 && displayNumberOnCalcScreenArray != 0) {
+//             var num = equals();
+//             var answer = eval(num);
+//             console.log(answer);
+//             outPutScreen.innerHTML = " ";
+//             outPutScreen.appendChild(document.createTextNode(eval(answer / 100)));
+//             equationArray.pop();
+//             equationArray.push(eval(answer / 100));
+//             console.log("#2")
+//         } else if (displayNumberOnCalcScreenArray.length === 0 && equationArray.length === 1) {
+//             var equation = equationArray.join("");
+//             outPutScreen.innerHTML = " ";
+//             outPutScreen.appendChild(document.createTextNode(eval(equation/100)));
+//             equationArray.splice(0);
+//             equationArray.push(equation / 100);
+//             console.log("#3")
+//             }
+//         }
+        
+// }
+
+
+
+
+// zeroButton.addEventListener("click", displayNumOnCalcScreen(numZero));
+// decimalButton.addEventListener("click", displayNumOnCalcScreen(decimal));
+// oneButton.addEventListener('click', displayNumOnCalcScreen(numOne));
+// twoButton.addEventListener('click', displayNumOnCalcScreen(numTwo));
+// threeButton.addEventListener('click', displayNumOnCalcScreen(numThree));
+// fourButton.addEventListener('click', displayNumOnCalcScreen(numFour));
+// fiveButton.addEventListener('click', displayNumOnCalcScreen(numFive));
+// sixButton.addEventListener('click', displayNumOnCalcScreen(numSix));
+// sevenButton.addEventListener('click', displayNumOnCalcScreen(numSeven));
+// eightButton.addEventListener('click', displayNumOnCalcScreen(numEight))
+// nineButton.addEventListener('click', displayNumOnCalcScreen(numNine));
+// equalsButton.addEventListener('click', equals)
+// addButton.addEventListener('click', arithmeticSignPressed(plus));
+// multipleButton.addEventListener("click", arithmeticSignPressed(multiple));
+// subtractionButton.addEventListener('click', arithmeticSignPressed(subtractionButton.value));
+// divideButton.addEventListener("click", arithmeticSignPressed(divide));
+// percentageButton.addEventListener("click", changeNumIntoPercentage(displayNumberOnCalcScreenArray))
+// clrButton.addEventListener("click", deleteAllEntriesOnScreen())
+// positiveAndNegativeButton.addEventListener("click", addPositiveOrNegative())
+
+function deleteAllEntriesOnScreen() {
+    return function () {
         displayNumberOnCalcScreenArray.splice(0);
-        equationArray.push(eval(equation));
+        equationArray.splice(0);
+        outPutScreen.innerHTML = " ";
+    }
+}
+
+function addNegative() {
+    displayNumberOnCalcScreenArray.unshift("-")
+}
+
+function addPositive() {
+    displayNumberOnCalcScreenArray.splice(0, 1);
+}
+function addPositiveOrNegative() {
+    return function () {
+        var numberOfClicks = 0;
+        numberOfClicks++;
+        if ((numberOfClicks % 2 != 0)) {
+            addNegative();
+            equationArray.push(displayNumberOnCalcScreenArray.join(""));
+        } 
     }
 }
 
 
 
-zeroButton.addEventListener("click", displayNumOnCalcScreen(numZero));
-decimalButton.addEventListener("click", displayNumOnCalcScreen(decimal));
-oneButton.addEventListener('click', displayNumOnCalcScreen(numOne));
-twoButton.addEventListener('click', displayNumOnCalcScreen(numTwo));
-threeButton.addEventListener('click', displayNumOnCalcScreen(numThree));
-fourButton.addEventListener('click', displayNumOnCalcScreen(numFour));
-fiveButton.addEventListener('click', displayNumOnCalcScreen(numFive));
-sixButton.addEventListener('click', displayNumOnCalcScreen(numSix));
-sevenButton.addEventListener('click', displayNumOnCalcScreen(numSeven));
-eightButton.addEventListener('click', displayNumOnCalcScreen(numEight))
-nineButton.addEventListener('click', displayNumOnCalcScreen(numNine));
-equalsButton.addEventListener('click', equals())
-addButton.addEventListener('click', arithmeticSignPressed(plus));
-multipleButton.addEventListener("click", arithmeticSignPressed(multiple));
-subtractionButton.addEventListener('click', arithmeticSignPressed(subtractionButton.value));
-divideButton.addEventListener("click", arithmeticSignPressed(divide));
 
 
 
