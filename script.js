@@ -1,7 +1,8 @@
 
 
 var clrButton = document.querySelector("#clear");
-var positiveAndNegativeButton = document.querySelector("#positive-negative");
+var negativeAndPositiveButton = document.querySelector("#positive-negative");
+var negativeValue = negativeAndPositiveButton.value;
 var percentageButton = document.querySelector("#percentage");
 var percentageJs = percentageButton.value;
 var divideButton = document.querySelector("#division")
@@ -23,9 +24,9 @@ var numSix = sixButton.value;
 var subtractionButton = document.querySelector("#minus")
 var minus = subtractionButton.value
 var oneButton = document.querySelector("#one");
-var numOne = oneButton.value;
+var numOne = parseInt(oneButton.value);
 var twoButton = document.querySelector("#two");
-var numTwo = twoButton.value;
+var numTwo = parseInt(twoButton.value);
 var threeButton = document.querySelector("#three");
 var numThree = threeButton.value;
 var addButton = document.querySelector("#addition");
@@ -40,219 +41,114 @@ var outPutScreen = document.querySelector(".output")
 var numButton = document.querySelector(".num-button")
 
 
-var displayArrayGlobal = [];
+var numberObject = {
+    numberEntry: [],
+    equation: []
+};
+
 var mathSymobols = [plus, minus, divide, multiple]
 var numbers = [0,1,2,3,4,5,6,7,8,9]
 
 
-function arrayCheck(item, array) {
+var getAnswer = equals();
+function arrayCheck(item) {
     return function () {
-        if (mathSymobols.includes(item) && displayArrayGlobal[displayArrayGlobal.length - 1] === item) {
-            (console.log("i am working one"))
-            var errorFound = array.pop();
-        } else if (typeof displayArrayGlobal[0] === 'number' && typeof parseInt(item) === 'number' && item !== "+") {
-            console.log(item);
-            console.log('i am working two')
-            displayArrayGlobal.splice(0);
-            displayArrayGlobal.push(item);
+        if (mathSymobols.includes(item) && displayArrayGlobal[displayArrayGlobal.length - 1] === item && displayArrayGlobal[displayArrayGlobal.length - 2] === item) {
+            displayArrayGlobal.pop();
+            var stopFunction = true
+        } else if (typeof displayArrayGlobal[0] === 'number' && parseInt(displayArrayGlobal[displayArrayGlobal.length - 1]) === parseInt(item)) {
+            displayArrayGlobal.splice(0, displayArrayGlobal.length, item);
             outPutScreen.innerHTML = " ";
-            outPutScreen.appendChild(document.createTextNode(item));
+        } else if (typeof displayArrayGlobal[0] === 'number' && (displayArrayGlobal[displayArrayGlobal.length - 1]) === '+') {
+            displayArrayGlobal.splice(0, 1, JSON.stringify(displayArrayGlobal[0]))
+        } else if (displayArrayGlobal[displayArrayGlobal.length - 1] === percentageJs && displayArrayGlobal.length == 2) {
+            getAnswer();
+            stopFunction = true;
+        } else if (displayArrayGlobal[displayArrayGlobal.length - 1] === percentageJs && displayArrayGlobal.length > 2) {
+            var index = displayArrayGlobal.indexOf(percentageJs);
+            displayArrayGlobal.splice(index, 1);
+            var doubleCheck = getAnswer();
+            if (doubleCheck == true) {
+                stopFunction = true;
+            }
+            displayArrayGlobal.push(percentageJs);
+            getAnswer();
+            stopFunction = true;
         }
-        return errorFound;
-    
+        return stopFunction;
     }
 }
 
-function displayArrayManipulation(value) {
-    return function () {
-        var displayArray = []
-        displayArray.push(value);
-        var check = arrayCheck(value, displayArray);
-        if (displayArrayGlobal[displayArrayGlobal.length - 1] === value || typeof displayArrayGlobal[0] === 'number') {
-            console.log("check will be executed")
-            check();
-        }
-        var display = displayArray.join("");
-        outPutScreen.appendChild(document.createTextNode(display));
-        displayArrayGlobal.push(value);
+function check() {
+    if (numberObject.numberEntry.length === 0 && numberObject.equation.length == 1) {
+        numberObject.equation.splice(0);
     }
-    
 }
+function numberEntryDomManipulation(value) {
+    return function () {
+        check();
+        numberObject.numberEntry.push(value);
+        outPutScreen.innerHTML = " ";
+        outPutScreen.appendChild(document.createTextNode(numberObject.numberEntry.join("")));
+    }
+}
+
+function equationArrayManipulation(symbol) {
+    numberObject.equation.push(symbol);
+    numberObject.numberEntry.splice(0);
+}
+
+function arithmeticSymbolPressed(symbol) {
+    return function () {
+        if (numberObject.numberEntry.length > 0) {
+            numberObject.equation.push(numberObject.numberEntry.join(""));
+            equationArrayManipulation(symbol);
+        } else if (numberObject.numberEntry.length == 0) {
+            equationArrayManipulation(symbol);
+        }
+    }
+
+}
+
 
 function equals() {
     return function () {
+        numberObject.equation.push(numberObject.numberEntry.join(""));
+        var answer = eval(numberObject.equation.join(""));
+        numberObject.equation.splice(0, numberObject.equation.length, parseInt(answer))
+        numberObject.numberEntry.splice(0);
         outPutScreen.innerHTML = " ";
-        var answer = displayArrayGlobal.join("")
-        outPutScreen.appendChild(document.createTextNode(eval(answer)));
-        displayArrayGlobal.splice(0);
-        displayArrayGlobal.push(eval(answer));
+        outPutScreen.appendChild(document.createTextNode(answer));
     }
 }
-oneButton.addEventListener("click", displayArrayManipulation(numOne));
-twoButton.addEventListener("click", displayArrayManipulation(numTwo));
-addButton.addEventListener("click", displayArrayManipulation(plus));
+
+
+oneButton.addEventListener("click", numberEntryDomManipulation(numOne));
+twoButton.addEventListener("click", numberEntryDomManipulation(numTwo));
+addButton.addEventListener("click", arithmeticSymbolPressed(plus));
 equalsButton.addEventListener("click", equals());
+// percentageButton.addEventListener("click", displayArrayManipulation(percentageJs))
+// negativeAndPositiveButton.addEventListener("click", displayArrayManipulation(negativeValue))
 
 
-
-
-
-// function displayNumOnCalcScreen(num) {
-//     return function () {
-//         var numArray = []
-//         numArray.push(num);
-//         console.log(numArray);
-//         displayNumberOnCalcScreenArray.push((num));
-//         console.log(displayNumberOnCalcScreenArray)
-//         var number = numArray.join(""); 
-//         outPutScreen.appendChild(document.createTextNode(number));   
-//     }
-// }
-// function integerOrFloat(number) {
-//     var integerOrFloat = number;
-//     console.log(integerOrFloat);
-//     if (integerOrFloat.indexOf(".") == -1) {
-//         console.log("I am a integer");
-//         parseInt(integerOrFloat);
-//     } else if (integerOrFloat.indexOf(".") != -1) {
-//         console.log("I am a float");
-//         parseFloat(integerOrFloat);
-//     }
-//     return integerOrFloat;
-    
-// }
-
-// function arithmeticSignPressed(arithemticSign) {
-//     return function () {
-//         if (displayNumberOnCalcScreenArray.length == 0) {
-//             equationArray.push(((arithemticSign)));
-//             outPutScreen.innerHTML = " ";
-//             outPutScreen.appendChild(document.createTextNode(equationArray.join("")));
-//             console.log(equationArray.join(""))
-//             displayNumberOnCalcScreenArray.splice(0);
-//         } else if(displayNumberOnCalcScreenArray.length >= 0) {
-//             var numberString = displayNumberOnCalcScreenArray.join("");
-//             equationArray.push(integerOrFloat(numberString));
-//             equationArray.push(((arithemticSign)));
-//             console.log(equationArray);
-//             outPutScreen.innerHTML = " ";
-//             outPutScreen.appendChild(document.createTextNode(equationArray.join("")));
-//             displayNumberOnCalcScreenArray.splice(0);
-//             console.log(equationArray);
-//         }
-//     }
-// }
-
-
-
-// function equals() {
-//         equationArray.push(integerOrFloat((displayNumberOnCalcScreenArray.join(""))))
-//         console.log(equationArray);
-//         var equation = equationArray.join("");
-//         outPutScreen.innerHTML = " ";
-//         outPutScreen.appendChild(document.createTextNode(eval(equation)));
-//         equationArray.splice(0);
-//         displayNumberOnCalcScreenArray.splice(0);
-//         equationArray.push(eval(equation));
-//         return equation;
-//     }
-
-
-
-// function changeNumIntoPercentage(numberAsString) {
-//     return function () {
-//         if (displayNumberOnCalcScreenArray.length != 0 && equationArray.length == 0 ) {
-//             var number = numberAsString.join("");
-//             var num = integerOrFloat(number);
-//             console.log(num);
-//             var percentage = num / 100
-//             console.log(percentage);
-//             outPutScreen.innerHTML = " ";
-//             displayNumberOnCalcScreenArray.splice(0);
-//             equationArray.push(percentage);
-//             outPutScreen.appendChild(document.createTextNode(percentage));
-//             console.log("#1")
-//         } else if (equationArray.length != 0 && displayNumberOnCalcScreenArray != 0) {
-//             var num = equals();
-//             var answer = eval(num);
-//             console.log(answer);
-//             outPutScreen.innerHTML = " ";
-//             outPutScreen.appendChild(document.createTextNode(eval(answer / 100)));
-//             equationArray.pop();
-//             equationArray.push(eval(answer / 100));
-//             console.log("#2")
-//         } else if (displayNumberOnCalcScreenArray.length === 0 && equationArray.length === 1) {
-//             var equation = equationArray.join("");
-//             outPutScreen.innerHTML = " ";
-//             outPutScreen.appendChild(document.createTextNode(eval(equation/100)));
-//             equationArray.splice(0);
-//             equationArray.push(equation / 100);
-//             console.log("#3")
-//             }
-//         }
-        
-// }
-
-
-
-
-// zeroButton.addEventListener("click", displayNumOnCalcScreen(numZero));
-// decimalButton.addEventListener("click", displayNumOnCalcScreen(decimal));
-// oneButton.addEventListener('click', displayNumOnCalcScreen(numOne));
-// twoButton.addEventListener('click', displayNumOnCalcScreen(numTwo));
-// threeButton.addEventListener('click', displayNumOnCalcScreen(numThree));
-// fourButton.addEventListener('click', displayNumOnCalcScreen(numFour));
-// fiveButton.addEventListener('click', displayNumOnCalcScreen(numFive));
-// sixButton.addEventListener('click', displayNumOnCalcScreen(numSix));
-// sevenButton.addEventListener('click', displayNumOnCalcScreen(numSeven));
-// eightButton.addEventListener('click', displayNumOnCalcScreen(numEight))
-// nineButton.addEventListener('click', displayNumOnCalcScreen(numNine));
-// equalsButton.addEventListener('click', equals)
-// addButton.addEventListener('click', arithmeticSignPressed(plus));
-// multipleButton.addEventListener("click", arithmeticSignPressed(multiple));
-// subtractionButton.addEventListener('click', arithmeticSignPressed(subtractionButton.value));
-// divideButton.addEventListener("click", arithmeticSignPressed(divide));
-// percentageButton.addEventListener("click", changeNumIntoPercentage(displayNumberOnCalcScreenArray))
-// clrButton.addEventListener("click", deleteAllEntriesOnScreen())
-// positiveAndNegativeButton.addEventListener("click", addPositiveOrNegative())
-
-function deleteAllEntriesOnScreen() {
-    return function () {
-        displayNumberOnCalcScreenArray.splice(0);
-        equationArray.splice(0);
-        outPutScreen.innerHTML = " ";
+function putItemsOntoTheDom(item) {
+    outPutScreen.innerHTML = " ";
+    outPutScreen.appendChild(document.createTextNode((item)));
+    displayArrayGlobal.splice(0, displayArrayGlobal.length, item);
+}
+function makeNegative() {
+    if (displayArrayGlobal[displayArrayGlobal.length - 1]=="+") {
+        alert('ERROR!!!');
+        return;
+    } else {
+        var targetNum = displayArrayGlobal[displayArrayGlobal.length - 1];
+        console.log(targetNum);
+        displayArrayGlobal.pop();
+        displayArrayGlobal.push(parseInt(targetNum * -1));
+        putItemsOntoTheDom(displayArrayGlobal.join(""));
+        displayArrayGlobal = displayArrayGlobal[0].split("+");
     }
 }
-
-function addNegative() {
-    displayNumberOnCalcScreenArray.unshift("-")
-}
-
-function addPositive() {
-    displayNumberOnCalcScreenArray.splice(0, 1);
-}
-function addPositiveOrNegative() {
-    return function () {
-        var numberOfClicks = 0;
-        numberOfClicks++;
-        if ((numberOfClicks % 2 != 0)) {
-            addNegative();
-            equationArray.push(displayNumberOnCalcScreenArray.join(""));
-        } 
-    }
-}
-
-
-
-
-
-
-
-
-
-
-
-
 
 
 
