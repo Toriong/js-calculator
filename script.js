@@ -46,50 +46,21 @@ var numberObject = {
     equation: []
 };
 
-var mathSymobols = [plus, minus, divide, multiple]
+var mathSymbols = ["+", "-", "/", "*"]
 var numbers = [0,1,2,3,4,5,6,7,8,9]
 
 
-var getAnswer = equals();
-function arrayCheck(item) {
-    return function () {
-        if (mathSymobols.includes(item) && displayArrayGlobal[displayArrayGlobal.length - 1] === item && displayArrayGlobal[displayArrayGlobal.length - 2] === item) {
-            displayArrayGlobal.pop();
-            var stopFunction = true
-        } else if (typeof displayArrayGlobal[0] === 'number' && parseInt(displayArrayGlobal[displayArrayGlobal.length - 1]) === parseInt(item)) {
-            displayArrayGlobal.splice(0, displayArrayGlobal.length, item);
-            outPutScreen.innerHTML = " ";
-        } else if (typeof displayArrayGlobal[0] === 'number' && (displayArrayGlobal[displayArrayGlobal.length - 1]) === '+') {
-            displayArrayGlobal.splice(0, 1, JSON.stringify(displayArrayGlobal[0]))
-        } else if (displayArrayGlobal[displayArrayGlobal.length - 1] === percentageJs && displayArrayGlobal.length == 2) {
-            getAnswer();
-            stopFunction = true;
-        } else if (displayArrayGlobal[displayArrayGlobal.length - 1] === percentageJs && displayArrayGlobal.length > 2) {
-            var index = displayArrayGlobal.indexOf(percentageJs);
-            displayArrayGlobal.splice(index, 1);
-            var doubleCheck = getAnswer();
-            if (doubleCheck == true) {
-                stopFunction = true;
-            }
-            displayArrayGlobal.push(percentageJs);
-            getAnswer();
-            stopFunction = true;
-        }
-        return stopFunction;
-    }
-}
 
-function check() {
+function checkIfNumberEntryIsEmpty() {
     if (numberObject.numberEntry.length === 0 && numberObject.equation.length == 1) {
         numberObject.equation.splice(0);
     }
 }
 function numberEntryDomManipulation(value) {
     return function () {
-        check();
+        checkIfNumberEntryIsEmpty();
         numberObject.numberEntry.push(value);
-        outPutScreen.innerHTML = " ";
-        outPutScreen.appendChild(document.createTextNode(numberObject.numberEntry.join("")));
+        putNumberOntoDom();
     }
 }
 
@@ -98,34 +69,111 @@ function equationArrayManipulation(symbol) {
     numberObject.numberEntry.splice(0);
 }
 
+
+
+
+
+function checkForErrorsWhenArithmeticSignIsPressed() {
+    var lastElementCheck = mathSymbols.includes(numberObject.equation[numberObject.equation.length - 1]);
+    var secondToLastElementCheck = mathSymbols.includes(numberObject.equation[numberObject.equation.length - 2]);
+    if (lastElementCheck && secondToLastElementCheck) {
+        console.log("delete");
+        delete numberObject.equation[numberObject.equation.length - 2];
+    } else if (numberObject.equation[numberObject.equation.length - 2] == ".") {
+        numberObject.equation = [];
+        alert("ERROR! Calculator will now rest.")
+        
+    }
+}
+
+
 function arithmeticSymbolPressed(symbol) {
     return function () {
         if (numberObject.numberEntry.length > 0) {
-            numberObject.equation.push(numberObject.numberEntry.join(""));
+            numberObject.equation.push((numberObject.numberEntry.join("")));
             equationArrayManipulation(symbol);
         } else if (numberObject.numberEntry.length == 0) {
             equationArrayManipulation(symbol);
         }
+        checkForErrorsWhenArithmeticSignIsPressed();
+        console.log(numberObject.equation);
     }
-
 }
-
+function clearArrays() {
+    numberObject.equation = [];
+    numberObject.numberEntry = [];
+}
 
 function equals() {
     return function () {
-        numberObject.equation.push(numberObject.numberEntry.join(""));
-        var answer = eval(numberObject.equation.join(""));
-        numberObject.equation.splice(0, numberObject.equation.length, parseInt(answer))
-        numberObject.numberEntry.splice(0);
-        outPutScreen.innerHTML = " ";
-        outPutScreen.appendChild(document.createTextNode(answer));
+        var check = equalsCheck(); 
+        if (check == true) {
+            outPutScreen.innerHTML = "0";
+            clearArrays();
+        } else  {
+            numberObject.equation.push(numberObject.numberEntry.join(""));
+            numberObject.equation.splice(0, numberObject.equation.length, parseFloat(eval(((numberObject.equation.join(""))))))
+            numberObject.numberEntry.splice(0);
+            putAnswerOntoDom();
+        }
     }
+}
+function equalsCheck() {
+    if ((numberObject.numberEntry.length == 1 && numberObject.equation.length == 0) || (numberObject.numberEntry.length == 0 && numberObject.equation.length >= 0 || numberObject.equation.length==0 && numberObject.numberEntry.length == 0)) {
+        return true
+    }else{
+        return false
+        }
+    }
+
+
+function putAnswerOntoDom() {
+    outPutScreen.innerHTML = " ";
+    outPutScreen.appendChild(document.createTextNode(eval(((numberObject.equation.join(""))))));
 }
 
 
+
+
+function decimalCheck(array) {
+    var check = array.includes(".");
+    console.log(check);
+        return check;
+}
+
+function decimalAdd() {
+    var checkForDecimal = decimalCheck(numberObject.numberEntry);
+    if (checkForDecimal == true) {
+        console.log("decimal present")
+        return;
+    } else if (checkForDecimal == false && (numberObject.equation.length != 1)) {
+        numberObject.numberEntry.push(decimal);
+        putNumberOntoDom()
+    } else if (numberObject.equation.length == 1 && numberObject.numberEntry == 0) {
+        numberObject.equation = [];
+        numberObject.numberEntry.push(decimal);
+        putNumberOntoDom();
+    } 
+}
+function putNumberOntoDom() {
+    outPutScreen.innerHTML = " ";
+    outPutScreen.appendChild(document.createTextNode(numberObject.numberEntry.join("")))
+}
+
 oneButton.addEventListener("click", numberEntryDomManipulation(numOne));
 twoButton.addEventListener("click", numberEntryDomManipulation(numTwo));
+threeButton.addEventListener("click", numberEntryDomManipulation(numThree));
+fourButton.addEventListener("click", numberEntryDomManipulation(numFour));
+fiveButton.addEventListener("click", numberEntryDomManipulation(numFive));
+sixButton.addEventListener("click", numberEntryDomManipulation(numSix));
 addButton.addEventListener("click", arithmeticSymbolPressed(plus));
+subtractionButton.addEventListener("click", arithmeticSymbolPressed(minus));
+multipleButton.addEventListener("click", arithmeticSymbolPressed(multiple));
+divideButton.addEventListener("click", arithmeticSymbolPressed(divide));
+decimalButton.addEventListener("click", decimalAdd);
+
+
+
 equalsButton.addEventListener("click", equals());
 // percentageButton.addEventListener("click", displayArrayManipulation(percentageJs))
 // negativeAndPositiveButton.addEventListener("click", displayArrayManipulation(negativeValue))
