@@ -59,18 +59,61 @@ function checkIfNumberEntryIsEmpty() {
 function numberEntryDomManipulation(value) {
     return function () {
         checkIfNumberEntryIsEmpty();
-        numberObject.numberEntry.push(value);
+        addZeroCheck();
+        numberObject.numberEntry.push(Number(value));
         putNumberOntoDom();
     }
 }
 
-function equationArrayManipulation(symbol) {
-    numberObject.equation.push(symbol);
-    numberObject.numberEntry.splice(0);
+function numberEntryCheck() {
+    var numberFound;
+    console.log(numberObject.numberEntry);
+    for (var index = 0; index < numberObject.numberEntry.length; index++){
+        if (numberObject.numberEntry[index]== ".") {
+            console.log("only a decimal is present.");
+            numberFound = false;
+            break;
+        } else if (typeof numberObject.numberEntry[index] == "number") {
+            console.log("a number")
+            numberFound = true;
+            break;
+        } else if (numberObject.numberEntry[index] == "(" && numberObject.numberEntry[index] == "-" ) {
+            console.log("continue loop")
+        } 
+    }
+    return numberFound;
 }
-
-
-
+function addMathSymbol(symbol) {
+    var numberCheck = numberEntryCheck();
+    console.log(numberObject.numberEntry);
+    console.log(numberCheck);
+    if (numberObject.numberEntry.length > 0 && numberCheck){
+        console.log("hellp")
+        numberObject.equation.push(((numberObject.numberEntry.join(""))))
+        numberObject.equation.push(symbol);
+        checkForErrorsWhenArithmeticSignIsPressed();
+        numberObject.numberEntry.splice(0);
+    } else if (numberObject.numberEntry.length == 0 && numberObject.equation.length > 0) {
+        console.log("wtf")
+        numberObject.equation.push(symbol);
+        checkForErrorsWhenArithmeticSignIsPressed();
+    } else if (numberObject.numberEntry[0] == "." && !numberCheck) {
+        console.log("yoyo")
+        alert("enter in a number.")
+    } else {
+        console.log("really?")
+    }
+}
+function equationArrayManipulation(symbol) {
+    if (numberObject.numberEntry[0] == "-") {
+        console.log("yo the heck?")
+        putParenthese();
+        addMathSymbol(symbol);
+    } else if (numberObject.numberEntry[0] != "-") {
+        console.log("not a negative number")
+        addMathSymbol(symbol);
+    }
+}
 
 
 function checkForErrorsWhenArithmeticSignIsPressed() {
@@ -79,47 +122,58 @@ function checkForErrorsWhenArithmeticSignIsPressed() {
     if (lastElementCheck && secondToLastElementCheck) {
         console.log("delete");
         delete numberObject.equation[numberObject.equation.length - 2];
-    } else if (numberObject.equation[numberObject.equation.length - 2] == ".") {
-        numberObject.equation = [];
-        alert("ERROR! Calculator will now rest.")
-        
+    } else if (numberObject.numberEntry[0] == ".") {
+        alert("enter a number.")
     }
 }
 
 
 function arithmeticSymbolPressed(symbol) {
     return function () {
-        if (numberObject.numberEntry.length > 0) {
-            numberObject.equation.push((numberObject.numberEntry.join("")));
+        if (numberObject.numberEntry.length > 0 && numberObject.numberEntry[0] !== "-") {
+            console.log("i am working #1")
             equationArrayManipulation(symbol);
         } else if (numberObject.numberEntry.length == 0) {
+            console.log("i am working #2")
             equationArrayManipulation(symbol);
+        } else if (numberObject.numberEntry.length > 0 && numberObject.numberEntry[0] == "-") {
+            // putParenthese();
+            equationArrayManipulation(symbol);
+            console.log(numberObject.equation);
         }
-        checkForErrorsWhenArithmeticSignIsPressed();
+        // checkForErrorsWhenArithmeticSignIsPressed();
         console.log(numberObject.equation);
     }
 }
 function clearArrays() {
     numberObject.equation = [];
     numberObject.numberEntry = [];
+    outPutScreen.innerHTML = "0";
 }
 
+function getAnswer() {
+    numberObject.equation.push(numberObject.numberEntry.join(""));
+    console.log(numberObject.equation.join(""));
+    numberObject.equation.splice(0, numberObject.equation.length, parseFloat(eval(((numberObject.equation.join(""))))))
+    numberObject.numberEntry.splice(0);
+}
 function equals() {
     return function () {
         var check = equalsCheck(); 
-        if (check == true) {
-            outPutScreen.innerHTML = "0";
-            clearArrays();
-        } else  {
-            numberObject.equation.push(numberObject.numberEntry.join(""));
-            numberObject.equation.splice(0, numberObject.equation.length, parseFloat(eval(((numberObject.equation.join(""))))))
-            numberObject.numberEntry.splice(0);
+        if (check == true) { console.log("enter in a number") }
+        else if (numberObject.numberEntry[0] == "-") {
+            putParenthese();
+            getAnswer();
+            putAnswerOntoDom();
+        }
+        else {
+            getAnswer();
             putAnswerOntoDom();
         }
     }
 }
 function equalsCheck() {
-    if ((numberObject.numberEntry.length == 1 && numberObject.equation.length == 0) || (numberObject.numberEntry.length == 0 && numberObject.equation.length >= 0 || numberObject.equation.length==0 && numberObject.numberEntry.length == 0)) {
+    if ((numberObject.numberEntry.length >= 1 && numberObject.equation.length == 0) || (numberObject.numberEntry.length == 0 && numberObject.equation.length >= 0 ||numberObject.numberEntry == "." && numberObject.equation.length !== 0)) {
         return true
     }else{
         return false
@@ -132,7 +186,12 @@ function putAnswerOntoDom() {
     outPutScreen.appendChild(document.createTextNode(eval(((numberObject.equation.join(""))))));
 }
 
-
+function addZeroCheck() {
+    var check = decimalCheck(numberObject.numberEntry);
+    if (check && numberObject.numberEntry.length == 1) {
+        numberObject.numberEntry.unshift(Number(0));
+    }
+}
 
 
 function decimalCheck(array) {
@@ -160,17 +219,122 @@ function putNumberOntoDom() {
     outPutScreen.appendChild(document.createTextNode(numberObject.numberEntry.join("")))
 }
 
+
+function clear() {
+    clearArrays();
+    outPutScreen.innerHTML = " ";
+    outPutScreen.appendChild(document.createTextNode("0"))
+    
+}
+clrButton.addEventListener("click", function () {
+    clear();
+})
+zeroButton.addEventListener("click", numberEntryDomManipulation(numZero));
 oneButton.addEventListener("click", numberEntryDomManipulation(numOne));
 twoButton.addEventListener("click", numberEntryDomManipulation(numTwo));
 threeButton.addEventListener("click", numberEntryDomManipulation(numThree));
 fourButton.addEventListener("click", numberEntryDomManipulation(numFour));
 fiveButton.addEventListener("click", numberEntryDomManipulation(numFive));
 sixButton.addEventListener("click", numberEntryDomManipulation(numSix));
+sevenButton.addEventListener("click", numberEntryDomManipulation(numSeven));
+eightButton.addEventListener("click", numberEntryDomManipulation(numEight));
+nineButton.addEventListener("click", numberEntryDomManipulation(numNine));
 addButton.addEventListener("click", arithmeticSymbolPressed(plus));
 subtractionButton.addEventListener("click", arithmeticSymbolPressed(minus));
 multipleButton.addEventListener("click", arithmeticSymbolPressed(multiple));
 divideButton.addEventListener("click", arithmeticSymbolPressed(divide));
 decimalButton.addEventListener("click", decimalAdd);
+negativeAndPositiveButton.addEventListener("click", addNegativeSign)
+
+function putParenthese() {
+        numberObject.numberEntry.push(")");
+        numberObject.numberEntry.unshift("(");
+}
+
+function splitArrayItem(array) {
+    for (var i = 0; i <= array.length; i++){
+        array[i]
+    }
+}
+function addNegativeSign() {
+    var negativeSignCheck = numberObject.numberEntry.includes("-")
+    if (negativeSignCheck == false && numberObject.numberEntry.length > 0) {
+        numberObject.numberEntry.unshift("-");
+        putNumberOntoDom();
+        console.log("#1")
+    } else if (negativeSignCheck == true && numberObject.numberEntry.length > 0) {
+        numberObject.numberEntry.shift("-");
+        putNumberOntoDom();
+        console.log("#2")
+    } else if (numberObject.numberEntry.length == 0 && numberObject.equation.length == 1) { 
+        var numString = numberObject.equation[0] + "";
+        var numString = (Array.from(numString));
+        console.log(numString);
+        var item = negativeButtonForNumberInEquationArray(numString)
+        numberObject.equation = [];
+        numberObject.equation.push(Number(item));
+        outPutScreen.innerHTML = " ";
+        outPutScreen.appendChild(document.createTextNode(numberObject.equation[0]));
+    }
+}
+
+function changeIntoPercentage() {
+    var arithmeticSignCheck = mathSymbols.includes(numberObject.equation[numberObject.equation.length - 1]); 
+    console.log(arithmeticSignCheck);
+    if (numberObject.numberEntry.length > 0 && numberObject.numberEntry[0] !== "." && numberObject.equation.length === 0) {
+        console.log("i am working #1")
+        numberObject.numberEntry.push(percentageJs);
+        numberObject.equation.push(eval(numberObject.numberEntry.join("")));
+        console.log(numberObject.equation);
+        numberObject.numberEntry = [];
+        outPutScreen.innerHTML = " ";
+        outPutScreen.appendChild(document.createTextNode(numberObject.equation[0]));
+    } else if (numberObject.numberEntry[0] !== "." && numberObject.equation.length > 0 && numberObject.numberEntry.length == 0 && arithmeticSignCheck == false) {
+        console.log("I am working #2")
+        console.log(numberObject.equation);
+        numberObject.equation.push(percentageJs);
+        var answer = (eval(numberObject.equation.join("")));
+        console.log(answer);
+        numberObject.equation = [];
+        numberObject.equation.push(answer);
+        outPutScreen.innerHTML = " ";
+        outPutScreen.appendChild(document.createTextNode(numberObject.equation[0]));
+    } else if (numberObject.numberEntry.length > 0 && arithmeticSignCheck == true) {
+        console.log("#4")
+        numberObject.equation.push(numberObject.numberEntry.join(""));
+        numberObject.numberEntry = [];
+        console.log(numberObject.equation);
+        numberObject.equation.push(percentageJs)
+        console.log(numberObject.equation);
+        var answer_two = eval(numberObject.equation.join(""));
+        console.log(answer_two);
+        numberObject.equation = [];
+        numberObject.equation.push(answer_two);
+        console.log(numberObject.equation);
+        outPutScreen.innerHTML = " ";
+        outPutScreen.appendChild(document.createTextNode((answer_two)));
+    } else {
+        console.log("wtf")
+    }
+}
+
+percentageButton.addEventListener("click", function () {
+    changeIntoPercentage();
+})
+
+
+
+function negativeButtonForNumberInEquationArray(array) {
+    if (array[0] == "-") {
+        array.shift()
+        return array.join("");
+    } else if (array[0] !== "-") {
+        array.unshift("-");
+        console.log(array);
+        return array.join("");
+        // return newArray.join("");
+    }  
+}
 
 
 
